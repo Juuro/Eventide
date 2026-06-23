@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-/// One day's reflection: five things done well, five things rejoiced about.
+/// One day's reflection: five things done well, five things enjoyed.
 /// Persisted locally via SwiftData. One instance per calendar day.
 @Model
 final class DayReflection {
@@ -11,13 +11,13 @@ final class DayReflection {
     /// Five short notes for "things I did well today".
     var didWell: [String]
 
-    /// Five short notes for "things I rejoiced about today".
-    var rejoiced: [String]
+    /// Five short notes for "things I enjoyed today".
+    var enjoyed: [String]
 
     init(date: Date) {
         self.date = Calendar.current.startOfDay(for: date)
         self.didWell = Array(repeating: "", count: DayReflection.slotsPerSection)
-        self.rejoiced = Array(repeating: "", count: DayReflection.slotsPerSection)
+        self.enjoyed = Array(repeating: "", count: DayReflection.slotsPerSection)
     }
 
     static let slotsPerSection = 5
@@ -25,7 +25,7 @@ final class DayReflection {
 
     /// How many of the 10 slots have non-empty text.
     var filledCount: Int {
-        (didWell + rejoiced)
+        (didWell + enjoyed)
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             .count
     }
@@ -38,14 +38,14 @@ final class DayReflection {
         didWell.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
     }
 
-    /// Count of filled entries in the "rejoiced" section only.
-    var rejoicedFilledCount: Int {
-        rejoiced.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
+    /// Count of filled entries in the "enjoyed" section only.
+    var enjoyedFilledCount: Int {
+        enjoyed.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
     }
 
     /// First non-empty entry from either section — used as a list row preview.
     var previewText: String? {
-        (didWell + rejoiced).first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        (didWell + enjoyed).first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
 
     /// Consecutive-day streak ending yesterday (not counting today).

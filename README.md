@@ -1,6 +1,6 @@
 # Eventide
 
-A calm, private evening-ritual app for iPhone. Each night, jot down **5 things you did well** and **5 things you rejoiced about** — under two minutes, then close the app.
+A calm, private evening-ritual app for iPhone. Each night, jot down **5 things you did well** and **5 things you enjoyed** — under two minutes, then close the app.
 
 ## Run
 

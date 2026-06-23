@@ -2,14 +2,14 @@ import SwiftUI
 
 enum ReflectionSection: CaseIterable, Identifiable {
     case didWell
-    case rejoiced
+    case enjoyed
 
     var id: Self { self }
 
     var title: String {
         switch self {
         case .didWell:  return "Did Well"
-        case .rejoiced: return "Rejoiced"
+        case .enjoyed: return "Enjoyed"
         }
     }
 
@@ -19,21 +19,21 @@ enum ReflectionSection: CaseIterable, Identifiable {
     var sectionColor: Color {
         switch self {
         case .didWell:  return Theme.accent
-        case .rejoiced: return Theme.accentRose
+        case .enjoyed: return Theme.accentRose
         }
     }
 
     var prompt: String {
         switch self {
         case .didWell:  return "Small wins count too."
-        case .rejoiced: return "What brought you a little joy?"
+        case .enjoyed: return "What brought you a little joy?"
         }
     }
 
     var systemImage: String {
         switch self {
         case .didWell:  return "star.fill"
-        case .rejoiced: return "heart.fill"
+        case .enjoyed: return "heart.fill"
         }
     }
 
@@ -42,7 +42,7 @@ enum ReflectionSection: CaseIterable, Identifiable {
         case .didWell:
             return ["I showed up for…", "I handled…", "I made time for…",
                     "I was kind when…", "I finished…"][index]
-        case .rejoiced:
+        case .enjoyed:
             return ["A moment with…", "I noticed…", "I enjoyed…",
                     "I felt grateful for…", "Something that made me smile…"][index]
         }

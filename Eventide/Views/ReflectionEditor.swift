@@ -4,7 +4,7 @@ import UIKit
 
 private enum FieldID: Hashable {
     case didWell(Int)
-    case rejoiced(Int)
+    case enjoyed(Int)
 }
 
 struct ReflectionEditor: View {
@@ -23,7 +23,7 @@ struct ReflectionEditor: View {
     var body: some View {
         List {
             section(.didWell, binding: $reflection.didWell)
-            section(.rejoiced, binding: $reflection.rejoiced)
+            section(.enjoyed, binding: $reflection.enjoyed)
         }
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
@@ -32,7 +32,7 @@ struct ReflectionEditor: View {
             if showsHeader {
                 BottomProgressBadge(
                     didWellFilled: reflection.didWellFilledCount,
-                    rejoicedFilled: reflection.rejoicedFilledCount,
+                    enjoyedFilled: reflection.enjoyedFilledCount,
                     isComplete: reflection.isComplete,
                     streak: streak
                 )
@@ -51,7 +51,7 @@ struct ReflectionEditor: View {
     private func section(_ kind: ReflectionSection, binding: Binding<[String]>) -> some View {
         Section {
             ForEach(0..<DayReflection.slotsPerSection, id: \.self) { index in
-                let fieldID: FieldID = kind == .didWell ? .didWell(index) : .rejoiced(index)
+                let fieldID: FieldID = kind == .didWell ? .didWell(index) : .enjoyed(index)
                 ReflectionRow(
                     text: binding[index],
                     placeholder: kind.placeholder(for: index),
@@ -84,9 +84,9 @@ struct ReflectionEditor: View {
     private func nextField(after id: FieldID) -> FieldID? {
         switch id {
         case .didWell(let i):
-            return i < DayReflection.slotsPerSection - 1 ? .didWell(i + 1) : .rejoiced(0)
-        case .rejoiced(let i):
-            return i < DayReflection.slotsPerSection - 1 ? .rejoiced(i + 1) : nil
+            return i < DayReflection.slotsPerSection - 1 ? .didWell(i + 1) : .enjoyed(0)
+        case .enjoyed(let i):
+            return i < DayReflection.slotsPerSection - 1 ? .enjoyed(i + 1) : nil
         }
     }
 }
@@ -171,7 +171,7 @@ private struct ReflectionRow: View {
 // Anchored to the bottom via safeAreaInset; always visible regardless of scroll position.
 private struct BottomProgressBadge: View {
     let didWellFilled: Int
-    let rejoicedFilled: Int
+    let enjoyedFilled: Int
     let isComplete: Bool
     let streak: Int
 
@@ -181,7 +181,7 @@ private struct BottomProgressBadge: View {
     var body: some View {
         HStack(alignment: .center, spacing: 20) {
             dotGroup(filled: didWellFilled, color: Theme.accent, label: "Did Well")
-            dotGroup(filled: rejoicedFilled, color: Theme.accentRose, label: "Rejoiced")
+            dotGroup(filled: enjoyedFilled, color: Theme.accentRose, label: "Enjoyed")
             Spacer()
             statusView
         }
@@ -194,7 +194,7 @@ private struct BottomProgressBadge: View {
         .accessibilityValue(
             isComplete
                 ? "Complete. All ten filled."
-                : "\(didWellFilled + rejoicedFilled) of \(slots * 2) filled. Did Well: \(didWellFilled) of \(slots). Rejoiced: \(rejoicedFilled) of \(slots)."
+                : "\(didWellFilled + enjoyedFilled) of \(slots * 2) filled. Did Well: \(didWellFilled) of \(slots). Enjoyed: \(enjoyedFilled) of \(slots)."
         )
     }
 
@@ -227,7 +227,7 @@ private struct BottomProgressBadge: View {
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         } else if streak >= 2 {
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(didWellFilled + rejoicedFilled)/\(slots * 2)")
+                Text("\(didWellFilled + enjoyedFilled)/\(slots * 2)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
                 Label("\(streak)d", systemImage: "flame.fill")
@@ -235,7 +235,7 @@ private struct BottomProgressBadge: View {
                     .foregroundStyle(.secondary)
             }
         } else {
-            Text("\(didWellFilled + rejoicedFilled)/\(slots * 2)")
+            Text("\(didWellFilled + enjoyedFilled)/\(slots * 2)")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
         }

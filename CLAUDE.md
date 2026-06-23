@@ -22,13 +22,13 @@ iPhone-only, SwiftUI + SwiftData, iOS 17+, no network, no accounts.
 
 **Data flow**: `EventideApp` owns the `ModelContainer`. `HomeView` fetches-or-creates today's `DayReflection` on appear and binds it to `ReflectionEditor`. Past days go through `PastEntriesView` → `DayDetailView` → same `ReflectionEditor`. All saves are implicit (SwiftData auto-saves on change).
 
-**`DayReflection` (`@Model`)** — one instance per calendar day. Two `[String]` arrays of 5 slots each (`didWell`, `rejoiced`). Key computed properties: `filledCount`, `isComplete`, `hasAnyContent`, `didWellFilledCount`, `rejoicedFilledCount`, `previewText`. Static `currentStreak(from:)` counts consecutive days with content ending yesterday.
+**`DayReflection` (`@Model`)** — one instance per calendar day. Two `[String]` arrays of 5 slots each (`didWell`, `enjoyed`). Key computed properties: `filledCount`, `isComplete`, `hasAnyContent`, `didWellFilledCount`, `enjoyedFilledCount`, `previewText`. Static `currentStreak(from:)` counts consecutive days with content ending yesterday.
 
 **`ReflectionEditor`** — the shared editing surface used by both HomeView and DayDetailView. Owns `@FocusState` (private `FieldID` enum) for auto-advancing keyboard through all 10 fields. Has a `@Query` for all reflections to compute streak. Bottom bar (`BottomProgressBadge`) pinned via `.safeAreaInset(edge: .bottom)` — always visible regardless of scroll position, compatible with `.navigationBarTitleDisplayMode(.large)`. The `showsHeader: Bool` parameter controls whether the badge renders (false in DayDetailView).
 
 **`ReflectionSection` enum** — single source of truth for section labels, placeholder strings, colors, and SF Symbol names.
 
-**`Theme`** — all visual constants. `Theme.accent` = indigo (Did Well), `Theme.accentRose` = systemPink (Rejoiced). Date formatting extensions live here (`reflectionHeader`, `reflectionListLabel`).
+**`Theme`** — all visual constants. `Theme.accent` = indigo (Did Well), `Theme.accentRose` = systemPink (Enjoyed). Date formatting extensions live here (`reflectionHeader`, `reflectionListLabel`).
 
 ## Key constraints
 

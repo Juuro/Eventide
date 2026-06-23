@@ -9,7 +9,7 @@ enum Theme {
     /// Accent used sparingly for progress and the done state.
     static let accent = Color.indigo
 
-    /// Warm rose accent for the "rejoiced" section — system adaptive for light/dark.
+    /// Warm rose accent for the "enjoyed" section — system adaptive for light/dark.
     static let accentRose = Color(.systemPink)
 
     /// Font style for the completion celebration message.
