@@ -108,10 +108,9 @@ private struct ReflectionRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             indicator
-                .frame(width: 20, alignment: .center)
-                .padding(.top, 5)
+                .frame(width: 24, alignment: .center)
                 .accessibilityHidden(true)
 
             TextField(placeholder, text: $text, axis: .vertical)
@@ -132,19 +131,25 @@ private struct ReflectionRow: View {
         }
     }
 
-    @ViewBuilder
     private var indicator: some View {
-        if isFilled {
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(sectionColor)
-                .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
-                .animation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.6), value: isFilled)
-        } else {
+        ZStack {
             Text("\(index + 1)")
-                .font(.caption.monospacedDigit())
+                .font(.system(size: 15).monospacedDigit())
                 .foregroundStyle(.secondary.opacity(0.4))
+                .scaleEffect(isFilled ? 0.5 : 1)
+                .opacity(isFilled ? 0 : 1)
+
+            Image(systemName: "checkmark")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(sectionColor)
+                .scaleEffect(isFilled ? 1 : 0.4)
+                .opacity(isFilled ? 1 : 0)
+                .symbolEffect(.bounce, value: isFilled)
         }
+        .animation(
+            reduceMotion ? .none : .spring(response: 0.35, dampingFraction: 0.55),
+            value: isFilled
+        )
     }
 }
 
