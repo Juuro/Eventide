@@ -103,6 +103,19 @@ private struct ReflectionRow: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var noNewlineText: Binding<String> {
+        Binding(
+            get: { text },
+            set: { newValue in
+                let stripped = newValue.replacingOccurrences(of: "\n", with: "")
+                text = stripped
+                if newValue.contains("\n") {
+                    onSubmit()
+                }
+            }
+        )
+    }
+
     private var isFilled: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -113,10 +126,11 @@ private struct ReflectionRow: View {
                 .frame(width: 24, alignment: .center)
                 .accessibilityHidden(true)
 
-            TextField(placeholder, text: $text, axis: .vertical)
+            TextField(placeholder, text: noNewlineText, axis: .vertical)
                 .font(.body)
                 .lineLimit(1...4)
                 .textInputAutocapitalization(.sentences)
+                .submitLabel(.next)
                 .accessibilityLabel(accessibilityLabel)
                 .accessibilityHint("Write a brief reflection")
                 .focused(focusedField, equals: fieldID)
