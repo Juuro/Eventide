@@ -6,6 +6,14 @@ struct RootView: View {
         NavigationStack {
             HomeView()
                 .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        NavigationLink {
+                            InsightsView()
+                        } label: {
+                            Image(systemName: "sparkles")
+                                .accessibilityLabel("Looking back")
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
                             PastEntriesView()
