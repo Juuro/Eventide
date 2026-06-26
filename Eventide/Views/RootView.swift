@@ -1,8 +1,8 @@
 import SwiftUI
 import SwiftData
 
-/// App shell. A bottom tab bar is the primary navigation: Reflections (today's
-/// entry plus the path to past days) and Insights. Today's progress lives in a
+/// App shell. A bottom tab bar is the primary navigation: Today (today's
+/// entry), Reflections (past days), and Insights. Today's progress lives in a
 /// persistent `ProgressChip` attached to the tab bar — a native bottom accessory
 /// on iOS 26+, falling back to a pinned chip above the tab bar on iOS 17–25.
 struct RootView: View {
@@ -16,6 +16,7 @@ struct RootView: View {
 
     private enum AppTab: Hashable {
         case reflections
+        case reflectionsHistory
         case insights
     }
 
@@ -35,8 +36,11 @@ struct RootView: View {
     private var shell: some View {
         if #available(iOS 26.0, *) {
             TabView(selection: $selection) {
-                Tab("Reflections", systemImage: "moon.stars", value: AppTab.reflections) {
+                Tab("Today", systemImage: "moon.stars", value: AppTab.reflections) {
                     reflectionsTab
+                }
+                Tab("Reflections", systemImage: "calendar", value: AppTab.reflectionsHistory) {
+                    reflectionsHistoryTab
                 }
                 Tab("Insights", systemImage: "sparkles", value: AppTab.insights) {
                     insightsTab
@@ -47,14 +51,22 @@ struct RootView: View {
                     ChipAccessory(reflection: today, streak: streak)
                 }
             }
+            // Drives the Apple Music collapse: scrolling down minimizes the tab bar
+            // to a single round button (bottom-left) and relocates the accessory
+            // inline beside it; scrolling up — or tapping the button — restores it.
+            // The system coordinates both animations as one transition.
+            .tabBarMinimizeBehavior(.onScrollDown)
         } else {
             TabView(selection: $selection) {
                 reflectionsTab
-                    .tabItem { Label("Reflections", systemImage: "moon.stars") }
+                    .tabItem { Label("Today", systemImage: "moon.stars") }
                     .tag(AppTab.reflections)
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         fallbackChip
                     }
+                reflectionsHistoryTab
+                    .tabItem { Label("Reflections", systemImage: "calendar") }
+                    .tag(AppTab.reflectionsHistory)
                 insightsTab
                     .tabItem { Label("Insights", systemImage: "sparkles") }
                     .tag(AppTab.insights)
@@ -71,6 +83,12 @@ struct RootView: View {
                     ProgressView().controlSize(.large)
                 }
             }
+        }
+    }
+
+    private var reflectionsHistoryTab: some View {
+        NavigationStack {
+            PastEntriesView()
         }
     }
 

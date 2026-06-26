@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 /// Today's reflection. Receives the entry for the current day from `RootView`
-/// (the shared source of truth) and offers a quiet path to past days.
+/// (the shared source of truth).
 struct HomeView: View {
     let today: DayReflection
 
@@ -13,16 +13,6 @@ struct HomeView: View {
         ReflectionEditor(reflection: today)
             .navigationTitle(today.date.reflectionHeader)
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        PastEntriesView()
-                    } label: {
-                        Image(systemName: "calendar")
-                            .accessibilityLabel("Past days")
-                    }
-                }
-            }
             .onAppear {
                 if !hasLaunchedBefore {
                     showWelcome = true
