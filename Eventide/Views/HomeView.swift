@@ -13,6 +13,16 @@ struct HomeView: View {
         ReflectionEditor(reflection: today)
             .navigationTitle(today.date.reflectionHeader)
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Settings")
+                }
+            }
             .onAppear {
                 if !hasLaunchedBefore {
                     showWelcome = true
@@ -30,7 +40,7 @@ struct HomeView: View {
         let onDismiss: () -> Void
 
         var body: some View {
-            VStack(spacing: 24) {
+            VStack(spacing: 24)fv  {
                 Spacer()
                 Image(systemName: "moon.stars.fill")
                     .font(.system(size: 56))

@@ -13,6 +13,8 @@ struct RootView: View {
 
     @State private var today: DayReflection?
     @State private var selection: AppTab = .reflections
+    // Today is the home base — the app lands here so the gear in its nav bar
+    // is the discoverable entry point to Settings.
 
     private enum AppTab: Hashable {
         case reflections
