@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 import UIKit
 
 private enum FieldID: Hashable {
@@ -7,18 +6,12 @@ private enum FieldID: Hashable {
     case enjoyed(Int)
 }
 
+/// The shared editing surface used by both today's entry and past days. Progress
+/// is shown by the persistent `ProgressChip` on the tab bar, not by the editor itself.
 struct ReflectionEditor: View {
     @Bindable var reflection: DayReflection
-    var showsHeader: Bool = true
 
     @FocusState private var focusedField: FieldID?
-
-    @Query(sort: \DayReflection.date, order: .reverse)
-    private var allReflections: [DayReflection]
-
-    private var streak: Int {
-        DayReflection.currentStreak(from: allReflections)
-    }
 
     var body: some View {
         List {
@@ -28,16 +21,6 @@ struct ReflectionEditor: View {
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if showsHeader {
-                BottomProgressBadge(
-                    didWellFilled: reflection.didWellFilledCount,
-                    enjoyedFilled: reflection.enjoyedFilledCount,
-                    isComplete: reflection.isComplete,
-                    streak: streak
-                )
-            }
-        }
         .onChange(of: reflection.isComplete) { _, newValue in
             if newValue {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -164,80 +147,5 @@ private struct ReflectionRow: View {
             reduceMotion ? .none : .spring(response: 0.35, dampingFraction: 0.55),
             value: isFilled
         )
-    }
-}
-
-// Merged progress badge — capsule dots + section labels + status.
-// Anchored to the bottom via safeAreaInset; always visible regardless of scroll position.
-private struct BottomProgressBadge: View {
-    let didWellFilled: Int
-    let enjoyedFilled: Int
-    let isComplete: Bool
-    let streak: Int
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private let slots = DayReflection.slotsPerSection
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 20) {
-            dotGroup(filled: didWellFilled, color: Theme.accent, label: "Did Well")
-            dotGroup(filled: enjoyedFilled, color: Theme.accentRose, label: "Enjoyed")
-            Spacer()
-            statusView
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-        .background(.bar)
-        .animation(reduceMotion ? .none : .easeInOut(duration: 0.25), value: isComplete)
-        .accessibilityElement()
-        .accessibilityLabel("Progress")
-        .accessibilityValue(
-            isComplete
-                ? "Complete. All ten filled."
-                : "\(didWellFilled + enjoyedFilled) of \(slots * 2) filled. Did Well: \(didWellFilled) of \(slots). Enjoyed: \(enjoyedFilled) of \(slots)."
-        )
-    }
-
-    private func dotGroup(filled: Int, color: Color, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                ForEach(0..<slots, id: \.self) { i in
-                    Capsule()
-                        .fill(i < filled ? color : Color.secondary.opacity(0.2))
-                        .frame(width: i < filled ? 14 : 10, height: 4)
-                        .animation(
-                            reduceMotion ? .none : .spring(response: 0.35, dampingFraction: 0.65),
-                            value: filled
-                        )
-                }
-            }
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(color)
-        }
-    }
-
-    @ViewBuilder
-    private var statusView: some View {
-        if isComplete {
-            Label("All done.", systemImage: "moon.stars.fill")
-                .font(Theme.completionFont.italic())
-                .foregroundStyle(Theme.accent)
-                .symbolEffect(.bounce, value: isComplete)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
-        } else if streak >= 2 {
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(didWellFilled + enjoyedFilled)/\(slots * 2)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Label("\(streak)d", systemImage: "flame.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            Text("\(didWellFilled + enjoyedFilled)/\(slots * 2)")
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(.secondary)
-        }
     }
 }

@@ -1,53 +1,39 @@
 import SwiftUI
 import SwiftData
 
-/// Today's reflection. Fetches the entry for the current day, creating one if needed.
+/// Today's reflection. Receives the entry for the current day from `RootView`
+/// (the shared source of truth).
 struct HomeView: View {
-    @Environment(\.modelContext) private var context
-    @State private var today: DayReflection?
+    let today: DayReflection
+
     @AppStorage("eventide_hasLaunchedBefore") private var hasLaunchedBefore = false
     @State private var showWelcome = false
 
     var body: some View {
-        Group {
-            if let today {
-                ReflectionEditor(reflection: today)
-                    .navigationTitle(today.date.reflectionHeader)
-                    .navigationBarTitleDisplayMode(.large)
-            } else {
-                ProgressView().controlSize(.large)
+        ReflectionEditor(reflection: today)
+            .navigationTitle(today.date.reflectionHeader)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Settings")
+                }
             }
-        }
-        .onAppear(perform: loadToday)
-        .sheet(isPresented: $showWelcome) {
-            WelcomeView {
-                hasLaunchedBefore = true
-                showWelcome = false
+            .onAppear {
+                if !hasLaunchedBefore {
+                    showWelcome = true
+                }
             }
-        }
-    }
-
-    /// Fetch the entry for today, or create and insert a fresh one.
-    private func loadToday() {
-        guard today == nil else { return }
-
-        let startOfDay = Calendar.current.startOfDay(for: .now)
-        let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
-        let descriptor = FetchDescriptor<DayReflection>(
-            predicate: #Predicate { $0.date >= startOfDay && $0.date < nextDay }
-        )
-
-        if let existing = try? context.fetch(descriptor).first {
-            today = existing
-        } else {
-            let fresh = DayReflection(date: .now)
-            context.insert(fresh)
-            today = fresh
-        }
-
-        if !hasLaunchedBefore {
-            showWelcome = true
-        }
+            .sheet(isPresented: $showWelcome) {
+                WelcomeView {
+                    hasLaunchedBefore = true
+                    showWelcome = false
+                }
+            }
     }
 
     private struct WelcomeView: View {

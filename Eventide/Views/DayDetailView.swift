@@ -5,7 +5,7 @@ struct DayDetailView: View {
     @Bindable var reflection: DayReflection
 
     var body: some View {
-        ReflectionEditor(reflection: reflection, showsHeader: false)
+        ReflectionEditor(reflection: reflection)
             .navigationTitle(reflection.date.reflectionHeader)
             .navigationBarTitleDisplayMode(.large)
     }
