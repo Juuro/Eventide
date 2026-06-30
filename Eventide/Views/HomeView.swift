@@ -40,7 +40,7 @@ struct HomeView: View {
         let onDismiss: () -> Void
 
         var body: some View {
-            VStack(spacing: 24)fv  {
+            VStack(spacing: 24) {
                 Spacer()
                 Image(systemName: "moon.stars.fill")
                     .font(.system(size: 56))

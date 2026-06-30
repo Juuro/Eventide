@@ -60,85 +60,132 @@ struct ProgressChip: View {
         }
     }
 
+    private var animation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.4)
+    }
+
     // MARK: - Expanded (default, above the tab bar)
+    //
+    // Hierarchy: hero fraction (primary) → two quiet category tracks (secondary)
+    // → streak / completion (tertiary). One accent, system material, no shadow.
 
     private var expanded: some View {
         HStack(alignment: .center, spacing: 16) {
-            dotGroup(filled: didWellFilled, color: Theme.accent, label: "Did Well")
-            dotGroup(filled: enjoyedFilled, color: Theme.accentRose, label: "Enjoyed")
-            Spacer(minLength: 8)
-            status
+            Text("\(filled)/\(total)")
+                .font(.title3.weight(.semibold).monospacedDigit())
+                .foregroundStyle(.primary)
+                .contentTransition(.numericText(value: Double(filled)))
+
+            VStack(spacing: 7) {
+                track(symbol: ReflectionSection.didWell.systemImage,
+                      label: ReflectionSection.didWell.title, filled: didWellFilled)
+                track(symbol: ReflectionSection.enjoyed.systemImage,
+                      label: ReflectionSection.enjoyed.title, filled: enjoyedFilled)
+            }
+
+            trailingStatus
+                .frame(minWidth: 44, alignment: .trailing)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 10)
+    }
+
+    /// One category: faint symbol + label, a continuous proportional rail, exact count.
+    private func track(symbol: String, label: String, filled: Int) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: symbol)
+                .font(.caption2)
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(Theme.accent.opacity(0.7))
+                .frame(width: 12)
+
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .frame(width: 52, alignment: .leading)
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.primary.opacity(0.08))
+                    Capsule()
+                        .fill(Theme.accent.opacity(0.85))
+                        .frame(width: geo.size.width * CGFloat(filled) / CGFloat(slots))
+                        .animation(animation, value: filled)
+                }
+            }
+            .frame(height: 4)
+
+            Text("\(filled)/\(slots)")
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var trailingStatus: some View {
+        if isComplete {
+            Image(systemName: "moon.stars")
+                .font(.subheadline)
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(Theme.accent)
+                .transition(.opacity)
+        } else if streak >= 2 {
+            HStack(spacing: 3) {
+                Image(systemName: "flame")
+                    .symbolRenderingMode(.hierarchical)
+                Text("\(streak)")
+                    .monospacedDigit()
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+        }
     }
 
     // MARK: - Inline (compact, attached in the tab bar row when scrolled)
+    //
+    // Total-first: a hairline overall ring + fraction, streak demoted behind a middot.
 
     private var inline: some View {
         HStack(spacing: 8) {
             if isComplete {
-                Image(systemName: "moon.stars.fill")
+                Image(systemName: "moon.stars")
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(Theme.accent)
-                Text("All done")
+                Text("Done")
                     .font(.subheadline.weight(.medium))
             } else {
+                miniRing
                 Text("\(filled)/\(total)")
                     .font(.subheadline.monospacedDigit().weight(.medium))
+                    .contentTransition(.numericText(value: Double(filled)))
                 if streak >= 2 {
-                    Label("\(streak)d", systemImage: "flame.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .labelStyle(.titleAndIcon)
+                    Text("·").foregroundStyle(.tertiary)
+                    HStack(spacing: 3) {
+                        Image(systemName: "flame")
+                            .symbolRenderingMode(.hierarchical)
+                        Text("\(streak)").monospacedDigit()
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
             }
         }
         .padding(.horizontal, 12)
     }
 
-    // MARK: - Pieces
-
-    private func dotGroup(filled: Int, color: Color, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                ForEach(0..<slots, id: \.self) { i in
-                    Capsule()
-                        .fill(i < filled ? color : Color.secondary.opacity(0.2))
-                        .frame(width: i < filled ? 14 : 10, height: 4)
-                        .animation(
-                            reduceMotion ? .none : .spring(response: 0.35, dampingFraction: 0.65),
-                            value: filled
-                        )
-                }
-            }
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(color)
+    /// Overall-progress ring for the compact state — calmer than a fraction alone.
+    private var miniRing: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.primary.opacity(0.12), lineWidth: 2)
+            Circle()
+                .trim(from: 0, to: CGFloat(filled) / CGFloat(total))
+                .stroke(Theme.accent.opacity(0.85), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(animation, value: filled)
         }
-    }
-
-    @ViewBuilder
-    private var status: some View {
-        if isComplete {
-            Label("All done.", systemImage: "moon.stars.fill")
-                .font(Theme.completionFont.italic())
-                .foregroundStyle(Theme.accent)
-                .symbolEffect(.bounce, value: isComplete)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
-        } else if streak >= 2 {
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(filled)/\(total)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Label("\(streak)d", systemImage: "flame.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            Text("\(filled)/\(total)")
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(.secondary)
-        }
+        .frame(width: 16, height: 16)
     }
 
     private var accessibilityValue: String {
